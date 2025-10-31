@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="Safe Parameter Update of Nonlinear Adaptive Controllers - Kasra Sinaei and Donald Ebeigbe">
+  <meta name="description" content="A novel framework that directly integrates safety constraints into the parameter adaptation process for nonlinear adaptive controllers, ensuring stability and safety.">
+  <meta name="keywords" content="safe control, adaptive control, control barrier functions, robotics, nonlinear systems, machine learning, AI">
+  <meta name="author" content="Kasra Sinaei, Donald Ebeigbe">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Pennsylvania State University">
+  <meta property="og:title" content="Safe Parameter Update of Nonlinear Adaptive Controllers">
+  <meta property="og:description" content="A novel framework that directly integrates safety constraints into the parameter adaptation process for nonlinear adaptive controllers, ensuring stability and safety.">
+  <meta property="og:url" content="https://kasrasinaei.github.io/safe_adaptive_control/">
+  <meta property="og:image" content="https://kasrasinaei.github.io/safe_adaptive_control/static/images/paper_summary.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Safe Parameter Update of Nonlinear Adaptive Controllers - Research Preview">
+  <meta property="article:published_time" content="2025-10-31T00:00:00.000Z">
+  <meta property="article:author" content="Kasra Sinaei">
+  <meta property="article:section" content="Research">
+  <meta property="article:tag" content="safe control">
+  <meta property="article:tag" content="adaptive control">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@psu_ee">
+  <meta name="twitter:creator" content="@KasraSinaei">
+  <meta name="twitter:title" content="Safe Parameter Update of Nonlinear Adaptive Controllers">
+  <meta name="twitter:description" content="A novel framework that directly integrates safety constraints into the parameter adaptation process for nonlinear adaptive controllers, ensuring stability and safety.">
+  <meta name="twitter:image" content="https://kasrasinaei.github.io/safe_adaptive_control/static/images/paper_summary.png">
+  <meta name="twitter:image:alt" content="Safe Parameter Update of Nonlinear Adaptive Controllers - Research Preview">
+
+  <!-- Academic/Research Specific -->
+  <meta name="citation_title" content="Safe Parameter Update of Nonlinear Adaptive Controllers">
+  <meta name="citation_author" content="Sinaei, Kasra">
+  <meta name="citation_author" content="Ebeigbe, Donald">
+  <meta name="citation_publication_date" content="2025">
+  <meta name="citation_conference_title" content="IEEE Robotics and Automation Letters (RA-L)">
+  <meta name="citation_pdf_url" content="https://kasrasinaei.github.io/safe_adaptive_control/static/pdfs/paper.pdf">
+  
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#2563eb">
+  <meta name="msapplication-TileColor" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://ajax.googleapis.com">
+  <link rel="preconnect" href="https://documentcloud.adobe.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+
+  <title>Safe Parameter Update of Nonlinear Adaptive Controllers</title>
+  
+  <!-- Favicon and App Icons -->
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link rel="apple-touch-icon" href="static/images/favicon.ico">
+  
+  <!-- Critical CSS - Load synchronously -->
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  
+  <!-- Non-critical CSS - Load asynchronously -->
+  <link rel="preload" href="static/css/bulma-carousel.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  
+  <!-- Fallback for browsers that don't support preload -->
+  <noscript>
+    <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  </noscript>
+  
+  <!-- Fonts - Optimized loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Defer non-critical JavaScript -->
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/bulma-carousel.min.js"></script>
+  <script defer src="static/js/bulma-slider.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+  
+  <!-- Structured Data for Academic Papers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "Safe Parameter Update of Nonlinear Adaptive Controllers",
+    "description": "This paper introduces a novel framework that directly integrates safety constraints into the parameter adaptation process itself. We propose enforcing safety by modulating the parameter update law through a minimally invasive perturbation, calculated via a real-time Quadratic Program (QP).",
+    "author": [
+      {
+        "@type": "Person",
+        "name": "Kasra Sinaei",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "The Pennsylvania State University"
+        }
+      },
+      {
+        "@type": "Person",
+        "name": "Donald Ebeigbe",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "The Pennsylvania State University"
+        }
+      }
+    ],
+    "datePublished": "2025-10-31",
+    "publisher": {
+      "@type": "Organization",
+      "name": "IEEE Robotics and Automation Letters (RA-L)"
+    },
+    "url": "https://kasrasinaei.github.io/safe_adaptive_control/",
+    "image": "https://kasrasinaei.github.io/safe_adaptive_control/static/images/paper_summary.png",
+    "keywords": ["safe control", "adaptive control", "control barrier functions", "robotics", "nonlinear systems"],
+    "abstract": "Adaptive controllers offer powerful tools for controlling nonlinear systems with parametric uncertainties, yet ensuring safety, particularly during the initial learning phase, remains a significant challenge. Conventional safety approaches often rely on filtering the control output using Control Barrier Functions (CBFs), which may fail to prevent unsafe behavior when parameter estimates are poor and can lead to overly conservative actions. This paper introduces a novel framework that directly integrates safety constraints into the parameter adaptation process itself. We propose enforcing safety by modulating the parameter update law through a minimally invasive perturbation, calculated via a real-time Quadratic Program (QP). This QP incorporates constraints derived from both a Robust Adaptive Control Lyapunov Function (RaCLF), ensuring system stability, and a CBF, guaranteeing forward invariance of a safe set. Critically, the CBF constraint leverages a formally derived, time-varying upper bound on the parameter estimation error, mitigating conservativeness as the system learns. We provide rigorous proofs for the stability of the closed-loop system and the validity of the safety constraint. The efficacy and practicality of the proposed safe parameter update strategy are demonstrated across diverse platforms, including numerical simulations of a mass-damper system and a mobile robot, high-fidelity simulation of a UR10 manipulator, and hardware experiments on a quadrupedal robot navigating amidst obstacles.",
+    "citation": "Sinaei, K. and Ebeigbe, D., 2025. Safe Parameter Update of Nonlinear Adaptive Controllers. IEEE Robotics and Automation Letters.",
+    "isAccessibleForFree": true,
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "mainEntity": {
+      "@type": "WebPage",
+      "@id": "https://kasrasinaei.github.io/safe_adaptive_control/"
+    }
+  }
+  </script>
+  
+  <!-- Website/Organization Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "The Pennsylvania State University",
+    "url": "https://www.psu.edu",
+    "logo": "https://kasrasinaei.github.io/safe_adaptive_control/static/images/favicon.ico",
+    "sameAs": [
+      "https://twitter.com/penn_state",
+      "https://github.com/penn-state-robotics"
+    ]
+  }
+  </script>
+</head>
+<body>
+
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- More Works Dropdown -->
+  <div class="more-works-container">
+    <button class="more-works-btn" onclick="toggleMoreWorks()" title="View More Works from the author">
+      <i class="fas fa-flask"></i>
+      More Works
+      <i class="fas fa-chevron-down dropdown-arrow"></i>
+    </button>
+    <div class="more-works-dropdown" id="moreWorksDropdown">
+      <div class="dropdown-header">
+        <h4>More Works from Our Lab</h4>
+        <button class="close-btn" onclick="toggleMoreWorks()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="works-list">
+        <!-- TODO: Replace with your lab's related works -->
+        <a href="https://ieeexplore.ieee.org/document/11107774/" class="work-item" target="_blank">
+          <div class="work-info">
+            <h5>Safety-Critical Position Control of Robots: A Model-Free Approach</h5>
+            <p>A model free approach to safety filtering position controlled robots using Control Barrier Functions`.</p>
+            <!-- TODO: Replace with venue and year -->
+            <span class="work-venue">American Control Conference 2025</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+        <!-- TODO: Add more related works or remove extra items -->
+        <a href="https://ieeexplore.ieee.org/document/11151463/" class="work-item" target="_blank">
+          <div class="work-info">
+            <h5>Safe Robust Control of Nonlinear Systems with Uncertain Regressor and Parameter Vector</h5>
+            <p>A safe robust control approach for nonlinear systems with uncertainties in the regressor and parameter vector.</p>
+            <span class="work-venue">Conference on Control System and Technology 2025</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content">
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Safe Parameter Update of Nonlinear Adaptive Controllers</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://kassra-sinaei.github.io" target="_blank">Kasra Sinaei</a>,</span>
+                <span class="author-block">
+                  <a href="https://www.eecs.psu.edu/departments/directory-detail-g.aspx?q=dee5127" target="_blank">Donald Ebeigbe</a></span>
+                  </div>
+
+                  <div class="is-size-5 publication-authors">
+                    <span class="author-block">The Pennsylvania State University<br>IEEE Robotics and Automation Letters (RA-L), 2025</span>
+                  </div>
+
+                  <div class="column has-text-centered">
+                    <div class="publication-links">
+                      <span class="link-block">
+                        <a href="YOUR_LINK_HERE" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                          <i class="fas fa-file-pdf"></i>
+                        </span>
+                        <span>Paper</span>
+                      </a>
+                    </span>
+
+                    <span class="link-block">
+                      <a href="https://github.com/Kassra-sinaei/safe_ac_exp.git" target="_blank"
+                      class="external-link button is-normal is-rounded is-dark">
+                      <span class="icon">
+                        <i class="fab fa-github"></i>
+                      </span>
+                      <span>Code</span>
+                    </a>
+                  </span>
+
+                  <!-- <span class="link-block">
+                    <a href="https://arxiv.org/abs/YOUR_ARXIV_ID" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Teaser -->
+  <section class="hero teaser">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <img src="static/images/paper_summary.png" alt="Framework block diagram" loading="lazy" class="teaser-image"/>
+        <h2 class="subtitle has-text-centered">
+          Our proposed framework enforces safety by directly modulating the parameter update law of an adaptive controller. This is achieved through a minimally invasive Quadratic Program (QP) that considers both stability (RaCLF) and safety (CBF) constraints, leading to safer and more efficient learning.
+        </h2>
+      </div>
+    </div>
+  </section>
+  <!-- End teaser -->
+
+  <!-- Paper abstract -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Adaptive controllers offer powerful tools for controlling nonlinear systems with parametric uncertainties, yet ensuring safety, particularly during the initial learning phase, remains a significant challenge. Conventional safety approaches often rely on filtering the control output using Control Barrier Functions (CBFs), which may fail to prevent unsafe behavior when parameter estimates are poor and can lead to overly conservative actions. This paper introduces a novel framework that directly integrates safety constraints into the parameter adaptation process itself. We propose enforcing safety by modulating the parameter update law through a minimally invasive perturbation, calculated via a real-time Quadratic Program (QP). This QP incorporates constraints derived from both a Robust Adaptive Control Lyapunov Function (RaCLF), ensuring system stability, and a CBF, guaranteeing forward invariance of a safe set. Critically, the CBF constraint leverages a formally derived, time-varying upper bound on the parameter estimation error, mitigating conservativeness as the system learns. We provide rigorous proofs for the stability of the closed-loop system and the validity of the safety constraint. The efficacy and practicality of the proposed safe parameter update strategy are demonstrated across diverse platforms, including numerical simulations of a mass-damper system and a mobile robot, high-fidelity simulation of a UR10 manipulator, and hardware experiments on a quadrupedal robot navigating amidst obstacles.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End paper abstract -->
+
+
+  <!-- Numerical Simulations -->
+  <section class="hero is-small">
+    <div class="hero-body">
+      <div class="container">
+        <h2 class="title is-3 has-text-centered">Numerical Simulations</h2>
+        <div class="content has-text-centered">
+          <p>
+            We first validate our framework on two simple nonlinear systems. The first simulation showcases the controller's ability to learn the unknown dynamics of a nonlinear mass-damper system while maintaining stability. The second demonstrates the effectiveness of the safety constraints as a mobile robot successfully navigates through an environment with obstacles, proving the controller's capability to guarantee forward invariance of a safe set while learning the controller parameters.
+          </p>
+        </div>
+        <div class="columns is-centered">
+          <div class="column">
+            <div class="content">
+              <h3 class="title is-4 has-text-centered">Nonlinear Mass-Damper System</h3>
+              <video poster="" controls muted loop height="100%" preload="metadata" class="simulation-video">
+                <source src="static/videos/damper_animation_full_aac.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered">Simulation of a mass-damper system with nonlinear dynamics, demonstrating the controller's ability to learn and stabilize the system safely.</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="content">
+              <h3 class="title is-4 has-text-centered">Mobile Robot Navigation</h3>
+              <video poster="" controls muted loop height="100%" preload="metadata" class="simulation-video">
+                <source src="static/videos/robot_animation_full_aac.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered">A single-integrator mobile robot navigating in an environment while avoiding obstacles, showcasing the safety guarantees.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Numerical Simulations -->
+
+
+  <!-- High-Fidelity Simulation -->
+  <section class="hero is-small is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h2 class="title is-3 has-text-centered">High-Fidelity UR10 Simulation</h2>
+        <div class="content has-text-centered">
+          <p>
+            To test our method in a more complex and realistic environment, we use Nvidia's IsaacSim to simulate a UR10 robotic arm. The comparison starkly illustrates the necessity of our safe parameter update law. 
+          </p>
+          <p>
+            The robot is tasked to loop between the three points denoted by spheres in the simulation. When one of the spheres is denoted as the center of an unsafe region, the UR10 fails to complete the task without our safety filter, violating the safety constraints. In contrast, with our proposed safety filter active, the UR10 successfully and safely performs the task while respecting all constraints.
+          </p>
+        </div>
+        <div class="columns is-centered">
+          <div class="column">
+            <div class="content">
+              <h3 class="title is-4 has-text-centered">Without Safety Filter</h3>
+              <video poster="" controls muted loop height="100%" preload="metadata">
+                <source src="static/videos/no_safety_filter.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered">The UR10 manipulator completes the task but violates safety constraints when the proposed safety filter on the parameter update is deactivated.</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="content">
+              <h3 class="title is-4 has-text-centered">With Safety Filter</h3>
+              <video poster="" controls muted loop height="100%" preload="metadata">
+                <source src="static/videos/safety_filter.mp4" type="video/mp4">
+              </video>
+              <p class="has-text-centered">With our safety filter active, the UR10 arm successfully and safely performs the task, respecting all constraints.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End High-Fidelity Simulation -->
+
+
+  <!-- Hardware Experiments -->
+  <section class="hero is-small">
+    <div class="hero-body">
+      <div class="container">
+        <h2 class="title is-3 has-text-centered">Hardware Experiments: Quadruped Robot</h2>
+        <div class="content has-text-centered">
+          <p>
+            The practicality and robustness of our proposed framework are demonstrated through hardware experiments on a quadrupedal robot. Navigating in a cluttered environment, the robot effectively avoids obstacles, validating the controller's performance on a physical system with unmodeled dynamics and real-world noise. The long-duration timelapse further showcases the controller's reliability and repeatability over extended operational periods, confirming its suitability for real-world deployment.
+          </p>
+        </div>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item">
+            <video poster="" controls muted loop height="100%" preload="metadata" class="hardware-video">
+              <source src="static/videos/experiment_1_aac.mp4" type="video/mp4">
+            </video>
+            <h2 class="subtitle has-text-centered">
+              Top view of the hardware test
+            </h2>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop height="100%" preload="metadata" class="hardware-video">
+              <source src="static/videos/experiment_2_aac.mp4" type="video/mp4">
+            </video>
+            <h2 class="subtitle has-text-centered">
+              Side view of the hardware test
+            </h2>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop height="100%" preload="metadata" class="hardware-video">
+              <source src="static/videos/experiment_timelapse.mp4" type="video/mp4">
+            </video>
+            <h2 class="subtitle has-text-centered">
+              A 15-minute timelapse showing the robustness and repeatability of the safe learning process.
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Hardware Experiments -->
+
+
+  <!--BibTex citation -->
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <div class="bibtex-header">
+        <h2 class="title">BibTeX</h2>
+        <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
+          <i class="fas fa-copy"></i>
+          <span class="copy-text">Copy</span>
+        </button>
+      </div>
+      <div class="content has-text-justified">
+            <p> To be updated after acceptance:</p>
+      </div>
+      <pre id="bibtex-code"><code>@article{Sinaei2025Safe,
+  title={Safe Parameter Update of Nonlinear Adaptive Controllers},
+  author={Sinaei, Kasra and Ebeigbe, Donald},
+  journal={IEEE Robotics and Automation Letters},
+  year={2025},
+  publisher={IEEE}
+}</code></pre>
+    </div>
+</section>
+<!--End BibTex citation -->
+
+
+  <footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+
+          <p>
+            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Statcounter tracking code -->
+  
+<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
+
+    <!-- End of Statcounter Code -->
+
+  </body>
+  </html>
