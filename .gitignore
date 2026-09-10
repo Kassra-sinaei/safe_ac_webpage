@@ -1,0 +1,6 @@
+# Raw/master video exports (ProRes etc.) — not used by the site, kept locally only
+static/videos/*.mov
+
+# Superseded/unused video exports — replaced by the *_aac versions actually embedded in index.html
+static/videos/experiment_2.mp4
+static/videos/experiment_timelapse_blurred.mp4
