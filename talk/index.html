@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safe Adaptive Control · IROS 2026 (7 slides + backups)</title>
+<meta name="author" content="Kasra Sinaei, Donald Ebeigbe">
+<link rel="icon" href="assets/img/iros2026_logo.png">
+<link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="assets/deck.css">
+</head>
+<body>
+
+<div id="stage">
+
+<section class="slide title-slide" data-title="Title" data-section="Open" data-time="8">
+  <div class="title-left">
+    <div class="eyebrow">IEEE&nbsp;RA-L&nbsp;2026 &nbsp;/&nbsp; Rapid&nbsp;Session</div>
+
+    <h1 class="deck">
+      Safe Adaptive Control with<br>
+      <span style="color:var(--gold)">Vanishing Conservativeness</span>
+    </h1>
+    <p class="sub" style="margin-bottom:34px; font-size:21px;">
+      for Robotic Systems with <strong>Unknown Dynamics</strong> via Barrier Functions
+    </p>
+
+    <p class="authors"><span class="me">Kasra Sinaei</span> &nbsp;&middot;&nbsp; Donald Ebeigbe</p>
+    <p class="affil">Control and Autonomous Robotics Lab &nbsp;&middot;&nbsp; Department of Electrical Engineering<br>The Pennsylvania State University</p>
+
+    <div class="pubmeta">
+      <span class="item"><b>IEEE RA-L</b> &nbsp;Vol.&nbsp;11, No.&nbsp;5, pp.&nbsp;6161&ndash;6168, 2026</span>
+      <span class="item">DOI &nbsp;<b>10.1109/LRA.2026.3678137</b></span>
+    </div>
+  </div>
+
+  <div class="title-right">
+    <img class="logo" src="assets/img/iros2026_logo_light.png" alt="IROS 2026 Pittsburgh">
+    <div class="venue">
+      <b>September 27 &ndash; October 1, 2026</b><br>
+      David L. Lawrence Convention Center
+    </div>
+    <div class="qrblock" style="margin-top:4px;">
+      <a class="qr" href="https://safe-adaptive-control.netlify.app" target="_blank" rel="noopener">
+        <img src="assets/img/qr_project.svg" alt="QR code to project page">
+      </a>
+      <div class="qlab">Paper &middot; Videos &middot; Code</div>
+    </div>
+    <div class="title-logos">
+      <img src="assets/img/carl_logo.png" alt="Control and Autonomous Robotics Lab (CARL)">
+      <span class="sep"></span>
+      <img src="assets/img/psu_mark_reverse.png" alt="Penn State">
+    </div>
+  </div>
+
+  <aside class="notes">
+    I am Kasra Sinaei from Penn State, presenting our work on safe adaptive control with vanishing conservativeness. Adaptive controllers are a well established control practice, and engineers have used them for over four decades. Control Barrier Functions are also a well established, popular choice for safety filtering.
+  </aside>
+</section>
+
+
+<!-- =========================================================
+     02 · THE PROBLEM  (minimal: ours vs. a conventional CBF filter)
+     ========================================================= -->
+<section class="slide" data-scan data-title="The problem: where the barrier goes" data-section="Motivation" data-time="24">
+  <div class="stack">
+    <div class="eyebrow">The Problem</div>
+    <h2 class="deck" style="font-size:44px; margin-bottom:8px;">Enforcing safety while the model estimate is not accurate</h2>
+    <p class="sub" style="margin-bottom:26px; max-width:none;">
+      An adaptive controller is least informed at <em class="k">t&nbsp;=&nbsp;0</em>, exactly when the robot starts moving.
+    </p>
+
+    <div class="cols c-6-6 mid grow" style="min-height:0; gap:36px;">
+      <div class="card red">
+        <div class="chip red" style="margin-bottom:14px;">&times;</div>
+        <div class="big">Conventional: filter the <em class="r">output</em></div>
+        <div class="mini">
+          <span class="mnode">Adaptive<br>controller</span>
+          <span class="marw">\(u\)</span>
+          <span class="mnode bad">CBF-QP<br><small>needs \(f,\,g\)</small></span>
+          <span class="marw">\(u_{\text{safe}}\)</span>
+          <span class="mnode">Robot</span>
+        </div>
+        <p class="cap">The filter needs the model you are still learning: with poor estimates it can
+          <em class="r">fail to prevent unsafe behavior</em>, or stay conservative forever.</p>
+      </div>
+
+      <div class="card gold">
+        <div class="chip" style="margin-bottom:14px;">&#9733;</div>
+        <div class="big" style="color:var(--gold)">Ours: filter the <em class="k">update law</em></div>
+        <div class="mini">
+          <span class="mnode good">Update law + QP<br><small>\(\breve W=\hat W+\delta W\)</small></span>
+          <span class="marw">\(\breve W\)</span>
+          <span class="mnode">Control law</span>
+          <span class="marw">\(u\)</span>
+          <span class="mnode">Robot</span>
+        </div>
+        <p class="cap">A real-time QP perturbs the <strong>parameter estimate</strong> instead, carrying a
+          model-error bound that <em class="k">shrinks as the robot learns</em>. No external filter.</p>
+      </div>
+    </div>
+
+    <div class="punch red frag" data-f="1">
+      Model-based safety filters are <span class="q">most vulnerable at the beginning of the roll-out</span>,
+      and need to be conservative.
+    </div>
+  </div>
+
+  <aside class="notes">
+    What makes integrating CBFs and adaptive control difficult is that a CBF needs a model, and adaptive control does not have an accurate system representation when it starts rolling out at time zero. To address this challenge, we propose filtering the parameter gains of the adaptive controller instead of the final action of the controller.
+  </aside>
+</section>
+
+<!-- =========================================================
+     03 · FORMULATION  (slim: three equations)
+     ========================================================= -->
+<section class="slide" data-scan data-title="Formulation: unknown robot → one weight vector" data-section="Formulation" data-time="26">
+  <div class="stack roomy">
+    <div class="eyebrow blue">Problem Formulation &nbsp;&middot;&nbsp; Sec. II &amp; III</div>
+    <h2 class="deck" style="font-size:40px; margin-bottom:18px;">Regressor-based representation of a nonlinear system</h2>
+
+    <div class="cols c-6-6 mid grow" style="min-height:0;">
+      <div>
+        <div class="eq" style="margin-bottom:18px;">
+          <span class="lbl">System</span>
+          \[ \dot{x} \;=\; f(x) \;+\; g(x)\,u \]
+          <span class="tagno">(1)</span>
+        </div>
+
+        <div class="rowitem" style="margin-bottom:16px;">
+          <span class="chip red">A1</span>
+          <span class="txt"><b>\(f\) and \(g\) fully unknown</b>: we know only their
+            <em class="r">dimensions</em>. Fully actuated.</span>
+        </div>
+        <div class="rowitem">
+          <span class="chip green">Goal</span>
+          <span class="txt">Track \(x_d(t)\) and keep \(\mathcal C=\{x:h(x)\ge0\}\)
+            <b>forward invariant</b>, with no model.</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="eq hero" style="margin-bottom:14px;">
+          <span class="lbl">Everything unknown, in one vector</span>
+          \[ \Psi(x) \;=\; Z(\cdot)\,W \;+\; \varepsilon \]
+          <span class="tagno">(8)</span>
+        </div>
+        <p class="small" style="margin-bottom:18px;">
+          \(Z\) <em class="k">known</em> basis functions (RBF / Fourier) &nbsp;&middot;&nbsp;
+          \(W\) <em class="r">unknown</em> weights, \(\|W\|\le W_{\max}\) &nbsp;&middot;&nbsp;
+          \(\|\varepsilon\|\le E\).
+        </p>
+
+        <div class="eq blue">
+          <span class="lbl">Control law &amp; the one knob &nbsp;(10&ndash;11)</span>
+          \[ u = Z\,\breve W + \dot x_d - Ke, \qquad
+             \breve W = \underbrace{\hat W}_{\textcolor{#5B9BFF}{\text{stability}}}
+                      + \underbrace{\delta W}_{\textcolor{#FEC526}{\text{safety}}} \]
+        </div>
+      </div>
+    </div>
+
+    <div class="punch blue frag" data-f="1">
+      One vector holds everything the robot doesn&rsquo;t know, and
+      <span class="q">\(\delta W\)</span> is the only safety knob.
+    </div>
+  </div>
+
+  <aside class="notes">
+    Our approach works on any control-affine nonlinear system, including robots. We use a regressor-based representation of the system, where a function approximator and an unknown parameter vector encode our model. Our control law consists of an inverse dynamics term, a proportional error term, and the desired trajectory; the parameter update has two parts, one coming from Lyapunov analysis and one from an online optimization problem.
+  </aside>
+</section>
+
+<!-- =========================================================
+     04 · MAIN RESULT  (Prop. 1 bound + the QP, merged)
+     ========================================================= -->
+<section class="slide" data-scan data-title="★ Vanishing conservativeness, and the QP" data-section="Method" data-time="42">
+  <div class="stack">
+    <div class="eyebrow">Main Result &nbsp;&middot;&nbsp; Proposition 1 &amp; Theorem 2</div>
+    <h2 class="deck" style="font-size:38px; margin-bottom:14px;">
+      <span style="color:var(--gold)">Vanishing conservativeness</span> via a decaying parameter-error bound
+    </h2>
+
+    <div class="cols c-6-6 mid" style="gap:32px;">
+      <div>
+        <div class="eq hero" style="margin-bottom:14px;">
+          <span class="lbl">Proposition 1: the certificate</span>
+          \[ \|\tilde W(t)\| \;\le\;
+             \sqrt{\dfrac{\,2\bar V_0 \;-\; k_e\displaystyle\int_0^{t}\!\|e(\tau)\|^{2}\,d\tau\,}{\lambda_{\min}(\Gamma^{-1})}}
+             \;=\; \bar W(t) \]
+          <span class="tagno">(16)</span>
+        </div>
+        <p class="small">
+          Every term of \(\bar V_0\) is <strong>known a priori</strong>, and the integral only grows, so
+          \(\bar W(t)\) is <em class="k">non-increasing</em>. Stability is never traded away (Thm.&nbsp;1);
+          \(\hat W\) need not converge (Remark&nbsp;1).
+        </p>
+      </div>
+
+      <div class="diagram">
+        <svg viewBox="0 0 620 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="bandg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#FEC526" stop-opacity=".17"/>
+              <stop offset="100%" stop-color="#FEC526" stop-opacity=".02"/>
+            </linearGradient>
+            <marker id="arwG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L10 5 L0 10 z" fill="#FEC526"/>
+            </marker>
+          </defs>
+          <line x1="60" y1="26"  x2="60"  y2="292" stroke="rgba(255,255,255,.26)" stroke-width="1.4"/>
+          <line x1="60" y1="292" x2="586" y2="292" stroke="rgba(255,255,255,.26)" stroke-width="1.4"/>
+          <path d="M60 56 C 196 100, 330 158, 578 202 L578 264 C 330 252, 196 238, 60 216 Z" fill="url(#bandg)"/>
+          <line x1="60" y1="44" x2="578" y2="44" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="7 6" opacity=".85"/>
+          <path d="M60 56 C 196 100, 330 158, 578 202" fill="none" stroke="#FEC526" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M60 216 C 132 234, 180 210, 236 230 C 292 250, 334 228, 392 246 C 452 264, 508 248, 578 264"
+                fill="none" stroke="#5B9BFF" stroke-width="2.6" stroke-linecap="round"/>
+          <line x1="112" y1="74"  x2="112" y2="206" stroke="#FEC526" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#arwG)"/>
+        </svg>
+        <div class="lay">
+          <div class="dlab" style="left:4.5%; top:8%; color:#96A2B4;">\(\|\tilde W\|\)</div>
+          <div class="dlab" style="left:10.5%; top:95.5%; color:#96A2B4;">\(t=0\)</div>
+          <div class="dlab" style="left:89%;   top:95.5%; color:#96A2B4;">time</div>
+          <div class="dnote" style="left:75%;  top:10%; color:#FF6B6B; font-size:14.5px;">constant worst case</div>
+          <div class="dnote" style="left:73%;  top:48%; color:#FEC526; font-weight:600;">\(\bar W(t)\): certified</div>
+          <div class="dnote" style="left:37%;  top:78%; color:#5B9BFF; font-size:14.5px;">true \(\|\tilde W(t)\|\) (never known)</div>
+          <div class="dlab" style="left:29.5%; top:43%; color:#FEC526;">conservativeness</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eq green frag" data-f="1" style="margin-top:14px;">
+      <span class="lbl">One QP on the update law &nbsp;(18), (20) &nbsp;&middot;&nbsp; OSQP, 100&nbsp;Hz</span>
+      \[ \begin{aligned}
+         \min_{\delta W}\;&amp; \tfrac12\,\delta W^{\!\top}\delta W
+            \qquad \text{s.t.}\quad \text{RaCLF (15)} \;\;\textcolor{#5B9BFF}{\text{keeps stability}} \\[2pt]
+         &amp; \nabla h\,Z\,\delta W \;\ge\; -\alpha\big(h(x)\big) + \nabla h\,(Ke-\dot x_d)
+            + \underbrace{\|\nabla h Z\|\,\bar W(t)}_{\textcolor{#FF6B6B}{\text{model error, shrinks}}}
+            + \|\nabla h\|\,E
+         \end{aligned} \]
+    </div>
+
+    <div class="punch frag" data-f="2">
+      As \(\bar W(t)\) decays, the constraint <span class="q">relaxes itself</span>.
+    </div>
+  </div>
+
+  <aside class="notes">
+    A nice characteristic of our method is its vanishing conservativeness. We start the safety filter with a conservative, worst-case estimation error, and thanks to the time-decaying error bound we derived, the safety filter relaxes over time and allows the robot to use its full potential. Our QP is shown here; it can be solved in a few milliseconds and generates safe, stabilizing parameter vectors.
+  </aside>
+</section>
+
+<section class="slide" data-scan data-title="Verification: simulation → high fidelity" data-section="Results" data-time="30">
+  <div class="stack">
+    <div class="eyebrow blue">Verification &nbsp;&middot;&nbsp; numerical &amp; NVIDIA IsaacSim &nbsp;&middot;&nbsp; Sec. IV-A&ndash;C</div>
+
+    <div class="cols c-6-6" style="gap:24px; max-width:1180px; margin:0 auto; width:100%;">
+      <div class="vid" style="aspect-ratio:1794/922;">
+        <span class="badge red">safety filter OFF</span>
+        <video src="../static/videos/no_safety_filter.mp4" poster="assets/img/poster/no_safety_filter.jpg" muted loop playsinline data-autoplay></video>
+      </div>
+      <div class="vid" style="aspect-ratio:1794/922;">
+        <span class="badge green">safety filter ON</span>
+        <video src="../static/videos/safety_filter.mp4" poster="assets/img/poster/safety_filter.jpg" muted loop playsinline data-autoplay></video>
+      </div>
+    </div>
+
+    <div class="cols c-6-6" style="gap:24px; max-width:1180px; margin:14px auto 0; width:100%;">
+      <div class="card red tight vc"><p class="cap">The end-effector drives
+        <strong>through</strong> the red keep-out sphere.</p></div>
+      <div class="card green tight vc"><p class="cap">Same unknown dynamics: it
+        <strong>skirts the sphere</strong> and still reaches every waypoint.</p></div>
+    </div>
+
+    <div class="cols c-3 stretch grow" style="gap:26px; margin-top:18px; min-height:0;">
+      <div class="stack">
+        <div class="plot fill grow" style="min-height:0;">
+          <img src="assets/img/md_barrier.png" alt="Barrier value over 314 s for the mass-damper">
+        </div>
+        <p class="tiny" style="margin-top:8px;"><strong>Mass&ndash;damper</strong>: \(h>0\) for 314&nbsp;s;
+          its floor drops \(\approx0.15\to0.05\) after \(\sim\)60&nbsp;s: <em class="k">\(\bar W(t)\) decaying</em>.</p>
+      </div>
+      <div class="stack">
+        <div class="plot fill grow" style="min-height:0;">
+          <img src="assets/img/fig3_mobile.png" alt="Mobile robot trajectory avoiding two obstacles">
+        </div>
+        <p class="tiny" style="margin-top:8px;"><strong>Mobile robot</strong>: unknown drift, reference
+          driven <em class="r">straight through</em> both obstacles; \(h\ge0\) never violated.</p>
+      </div>
+      <div class="stack">
+        <div class="plot fill grow" style="min-height:0;">
+          <img src="assets/img/ur10_h.png" alt="Barrier function h(q) stays positive for the UR10">
+        </div>
+        <p class="tiny" style="margin-top:8px;"><strong>UR10, 6-DoF</strong>: 66 unknown parameters at
+          100&nbsp;Hz; \(h(q)\) never crosses zero. \(\nabla h\) needs only the <em class="k">kinematic</em>
+          Jacobian (Remark&nbsp;3).</p>
+      </div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    We validate our method in simulation. Here is a video of a UR10 robot in Isaac Sim. The robot follows three waypoints in a loop. On the right, the safety filter is activated, and the robot does not enter the area around the red sphere. On the bottom left is the CBF plot as a function of time, where we see the vanishing conservativeness of the framework.
+  </aside>
+</section>
+
+
+<section class="slide" data-scan data-title="Verification: hardware, Unitree Go1" data-section="Results" data-time="26">
+  <div class="stack">
+    <div class="eyebrow green">Verification &nbsp;&middot;&nbsp; Hardware &nbsp;&middot;&nbsp; Sec. IV-D</div>
+
+    <div class="cols c-6-6 stretch grow" style="min-height:0; gap:26px;">
+      <div class="stack">
+        <div class="vid grow" style="min-height:0;">
+          <span class="badge green" style="background:rgba(8,11,17,.78);">Unitree Go1 &middot; ROS &middot; MoCap &middot; 4&times; speed</span>
+          <video src="../static/videos/experiment_1_aac.mp4" poster="assets/img/poster/experiment_1_aac.jpg" muted loop playsinline data-autoplay data-rate="4"></video>
+        </div>
+        <div class="cols c-4" style="gap:14px; margin-top:18px;">
+          <div class="stat"><span class="n green">20/20</span><span class="l">trials safe</span></div>
+          <div class="stat"><span class="n">0</span><span class="l">dynamics known</span></div>
+          <div class="stat"><span class="n blue">100</span><span class="l">Hz control loop</span></div>
+          <div class="stat"><span class="n">2</span><span class="l">obstacles</span></div>
+        </div>
+      </div>
+
+      <div class="stack" style="gap:16px; min-height:0;">
+        <div class="plot fill grow" style="min-height:0;">
+          <img src="assets/img/hw_traj.png" alt="Measured quadruped trajectory around two obstacles">
+          <div class="figcap">measured trajectory (motion capture)</div>
+        </div>
+        <div class="cols c-6-6" style="gap:16px;">
+          <div class="plot fill">
+            <img src="assets/img/hw_h.png" alt="Barrier function stays in the safe region for the whole run">
+            <div class="figcap">\(h(x)\) stays in the safe region</div>
+          </div>
+          <div class="plot fill">
+            <img src="assets/img/hw_w.png" alt="Parameter norm stays below its bound">
+            <div class="figcap">\(\|\hat w\|\) stays under its bound</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="punch green frag" data-f="1" style="margin-top:20px;">
+      A quadruped with <span class="q">no dynamic model at all</span>: unicycle mapping,
+      unknown drift, 20 of 20 runs safe.
+    </div>
+  </div>
+
+  <aside class="notes">
+    We also validate the framework in hardware. It solves a quadrupedal navigation problem, where we have an inaccurate locomotion controller with some unknown drift, and our controller successfully takes the robot to the goal pose.
+  </aside>
+</section>
+
+
+<section class="slide" data-title="Takeaways &amp; contact" data-section="Close" data-time="14">
+  <div class="stack">
+    <div class="eyebrow">Conclusion</div>
+
+    <div class="cols c-7-5 mid" style="flex:1;">
+      <div class="stack">
+        <h2 class="deck" style="font-size:38px; margin-bottom:22px;">
+          Put the barrier where the <span style="color:var(--gold)">uncertainty</span> lives.
+        </h2>
+
+        <div class="rowitem">
+          <span class="chip">1</span>
+          <span class="txt"><b>Safety on the update law, not the output.</b> A CBF-QP perturbs
+            \(\delta W\) so the parameter estimate itself is always safe, with no external filter.</span>
+        </div>
+        <div class="rowitem">
+          <span class="chip blue">2</span>
+          <span class="txt"><b>Stability is never sacrificed.</b> The RaCLF constraint holds for every
+            \(\delta W\) the QP may choose (Thm.&nbsp;1).</span>
+        </div>
+        <div class="rowitem">
+          <span class="chip green">3</span>
+          <span class="txt"><b>Conservativeness vanishes.</b> A certified, monotonically decreasing bound
+            \(\bar W(t)\) on the parameter error relaxes the CBF as the robot learns (Prop.&nbsp;1).</span>
+        </div>
+
+        <div class="card tight" style="margin-top:20px; border-color:rgba(254,197,38,.24)">
+          <p class="cap"><strong>Validated</strong> on a nonlinear mass&ndash;damper, a drifting mobile robot,
+            a 6-DoF UR10 in IsaacSim, and a Unitree Go1 in hardware,
+            all with <em class="k">fully unknown dynamics</em>.</p>
+        </div>
+
+        <p class="small" style="margin-top:16px;">
+          <span style="color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.13em;
+                text-transform:uppercase;">Next</span> &nbsp; extending the framework to
+          <strong>underactuated</strong> systems, removing the heuristic velocity mapping (Remark&nbsp;4).
+        </p>
+      </div>
+
+      <div>
+        <div class="qrwall">
+          <div class="qrblock">
+            <a class="qr" href="https://safe-adaptive-control.netlify.app" target="_blank" rel="noopener">
+              <img src="assets/img/qr_project.svg" alt="QR to project page"></a>
+            <div class="qlab">Project page<br><span style="color:var(--faint)">videos</span></div>
+          </div>
+          <div class="qrblock">
+            <a class="qr" href="https://doi.org/10.1109/LRA.2026.3678137" target="_blank" rel="noopener">
+              <img src="assets/img/qr_paper.svg" alt="QR to the paper DOI"></a>
+            <div class="qlab">Paper<br><span style="color:var(--faint)">IEEE RA-L</span></div>
+          </div>
+          <div class="qrblock">
+            <a class="qr" href="https://github.com/Kassra-sinaei/safe_ac_exp" target="_blank" rel="noopener">
+              <img src="assets/img/qr_code.svg" alt="QR to the code repository"></a>
+            <div class="qlab">Code<br><span style="color:var(--faint)">GitHub</span></div>
+          </div>
+          <div class="qrblock">
+            <a class="qr" href="https://kassra-sinaei.github.io" target="_blank" rel="noopener">
+              <img src="assets/img/qr_author.svg" alt="QR to the author's website"></a>
+            <div class="qlab">Kasra Sinaei<br><span style="color:var(--faint)">personal</span></div>
+          </div>
+          <div class="qrblock">
+            <a class="qr" href="https://sites.psu.edu/carl/" target="_blank" rel="noopener">
+              <img src="assets/img/qr_lab.svg" alt="QR to the CARL lab website"></a>
+            <div class="qlab">CARL lab<br><span style="color:var(--faint)">Penn State</span></div>
+          </div>
+        </div>
+
+        <div class="card tight" style="margin-top:20px;">
+          <p class="tiny" style="line-height:1.75; color:var(--text-2);">
+            <strong style="color:var(--gold)">K. Sinaei</strong> and D. Ebeigbe, &ldquo;Safe Adaptive Control With
+            Vanishing Conservativeness for Robotic Systems With Unknown Dynamics via Barrier Functions,&rdquo;
+            <em>IEEE Robotics and Automation Letters</em>, vol.&nbsp;11, no.&nbsp;5, pp.&nbsp;6161&ndash;6168, 2026.<br>
+            <span class="mono" style="color:var(--muted)">doi:10.1109/LRA.2026.3678137</span>
+          </p>
+          <p class="tiny" style="margin:12px 0 0; color:var(--muted);">
+            <span class="mono">kasra@psu.edu</span> &nbsp;&middot;&nbsp;
+            Control and Autonomous Robotics Lab, Penn State
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="punch">
+      Safety you can <span class="q">prove</span>. Conservativeness you can
+      <span class="q">outgrow</span>.
+    </div>
+  </div>
+
+  <aside class="notes">
+    Thank you for your attention. I will be happy to discuss more at the poster session.
+  </aside>
+</section>
+
+
+</div><!-- /#stage -->
+
+
+<!-- =========================================================
+     CHROME
+     ========================================================= -->
+<!-- Corner QR dock: deck.js copies this into every slide marked data-scan,
+     so anyone who tunes in mid-talk can grab the paper and the website. -->
+<template id="scan-tpl">
+  <nav class="scan" aria-label="Paper and project website">
+    <a href="https://doi.org/10.1109/LRA.2026.3678137" target="_blank" rel="noopener">
+      <img src="assets/img/qr_paper.svg" alt="QR code to the paper (DOI)">
+      <span class="ql">Paper</span>
+    </a>
+    <a href="https://safe-adaptive-control.netlify.app" target="_blank" rel="noopener">
+      <img src="assets/img/qr_project.svg" alt="QR code to the project website">
+      <span class="ql">Website</span>
+    </a>
+  </nav>
+</template>
+
+<div id="progress"></div>
+<div id="sectionmark"></div>
+<div id="counter"></div>
+<div id="timer"></div>
+<div id="hint"><kbd>&rarr;</kbd> next &nbsp; <kbd>f</kbd> fullscreen &nbsp; <kbd>o</kbd> overview &nbsp; <kbd>s</kbd> script &nbsp; <kbd>t</kbd> timer &nbsp; <kbd>?</kbd> help</div>
+
+<div class="overlay" id="overview">
+  <h3>Overview &nbsp;&middot;&nbsp; click a slide to jump</h3>
+  <div id="ovGrid"></div>
+  <div class="esc">ESC or O to close</div>
+</div>
+
+<div class="overlay" id="help">
+  <h3>Keyboard</h3>
+  <div class="helpgrid">
+    <div class="helprow"><span class="keys"><kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>PgDn</kbd> <kbd>N</kbd></span><span class="d">Next step (reveals, then next slide)</span></div>
+    <div class="helprow"><span class="keys"><kbd>&larr;</kbd> <kbd>PgUp</kbd> <kbd>P</kbd></span><span class="d">Previous step</span></div>
+    <div class="helprow"><span class="keys"><kbd>&darr;</kbd></span><span class="d">Next slide, skipping reveals</span></div>
+    <div class="helprow"><span class="keys"><kbd>&uarr;</kbd></span><span class="d">Previous slide</span></div>
+    <div class="helprow"><span class="keys"><kbd>Home</kbd> / <kbd>End</kbd></span><span class="d">First / last slide</span></div>
+    <div class="helprow"><span class="keys"><kbd>1</kbd>&hellip;<kbd>9</kbd></span><span class="d">Type a number to jump</span></div>
+    <div class="helprow"><span class="keys"><kbd>F</kbd></span><span class="d">Fullscreen (use this to present)</span></div>
+    <div class="helprow"><span class="keys"><kbd>O</kbd></span><span class="d">Slide overview grid</span></div>
+    <div class="helprow"><span class="keys"><kbd>S</kbd></span><span class="d">Speaker script &amp; timings</span></div>
+    <div class="helprow"><span class="keys"><kbd>T</kbd></span><span class="d">3:00 countdown + pace indicator</span></div>
+    <div class="helprow"><span class="keys"><kbd>R</kbd></span><span class="d">Restart the timer</span></div>
+    <div class="helprow"><span class="keys"><kbd>B</kbd></span><span class="d">Blackout the screen</span></div>
+    <div class="helprow"><span class="keys"><kbd>?</kbd></span><span class="d">This panel</span></div>
+    <div class="helprow"><span class="keys"><kbd>Esc</kbd></span><span class="d">Close any overlay</span></div>
+  </div>
+  <div class="esc" style="margin-top:34px;">
+    Click the right 78&#37; of the screen to advance, the left 22&#37; to go back. Swipe on touch devices.<br>
+    A presenter remote sends PgUp / PgDn and works out of the box.
+  </div>
+</div>
+
+<div class="overlay" id="notes">
+  <h3>Speaker script &nbsp;&middot;&nbsp; 2:50 lightning session</h3>
+  <div id="notesBody"></div>
+  <div class="esc">ESC or S to close &nbsp;&middot;&nbsp; click any entry to jump to that slide</div>
+</div>
+
+<script src="assets/vendor/katex/katex.min.js"></script>
+<script src="assets/vendor/katex/auto-render.min.js"></script>
+<script>
+  /* Render math immediately: the DOM above is fully parsed, and deck.js
+     (loaded next) copies already-rendered note markup into the script panel. */
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '\\[', right: '\\]', display: true  },
+      { left: '$$',    right: '$$',    display: true  },
+      { left: '\\(', right: '\\)', display: false }
+    ],
+    ignoredTags: ['script','noscript','style','textarea','pre','code','option','svg'],
+    throwOnError: false,
+    strict: false
+  });
+</script>
+<script src="assets/deck.js"></script>
+</body>
+</html>
